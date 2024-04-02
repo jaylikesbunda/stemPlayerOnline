@@ -112,34 +112,45 @@ function handleButtonPress(index, isPressed) {
 
     const direction = directionMap[index];
 
+    // Use a toggle state to remember if an action is active
+    if (!window.toggleState) {
+        window.toggleState = {
+            "top": false,
+            "bottom": false,
+            "left": false,
+            "right": false
+        };
+    }
+
     if (direction) {
         if (isPressed) {
-            dpadHold[direction] = true;
-            setTimeout(() => {
-                if (dpadHold[direction]) {
-                    console.log("Isolating stem due to D-pad hold:", direction);
-                    isolateStem(direction);
-                }
-            }, 500); 
-        } else {
-            dpadHold[direction] = false;
-            // Add logic here if you need to cancel or reverse the isolation when the button is released
-            console.log("Released D-pad direction:", direction);
-            // Example: cancelIsolation(direction); if you have such functionality
+            // Toggle the action state for the direction
+            window.toggleState[direction] = !window.toggleState[direction];
+
+            if (window.toggleState[direction]) {
+                // If toggled on, perform the action
+                console.log("Activating action for direction:", direction);
+                isolateStem(direction); // Activate the action for this direction
+            } else {
+                // If toggled off, undo the action
+                console.log("Deactivating action for direction:", direction);
+                cancelIsolation(direction); // Deactivate or undo the action
+            }
         }
+        // No need to handle button release separately for toggle functionality
     } else {
+        // For other buttons, handle press and release actions
         const actionKey = buttonMap[index];
         if (actionKey) {
             if (isPressed) {
-                // Simulate pressing the button
                 document.dispatchEvent(new KeyboardEvent('keydown', { 'key': actionKey }));
             } else {
-                // Simulate releasing the button
                 document.dispatchEvent(new KeyboardEvent('keyup', { 'key': actionKey }));
             }
         }
     }
 }
+
 
 
 // Improved polling function to check for gamepad inputs
