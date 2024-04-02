@@ -101,37 +101,53 @@ function updateButtonState(gamepad) {
         }
     });
 }
+// Global state to track if a D-pad direction is considered "pressed down"
+const dpadPressedState = {
+    "top": false,
+    "bottom": false,
+    "left": false,
+    "right": false
+};
 
 function handleButtonPress(index, isPressed) {
     const directionMap = {
-        12: "top",
-        13: "bottom",
-        14: "left",
-        15: "right"
+        12: "top",    // D-pad Up
+        13: "bottom", // D-pad Down
+        14: "left",   // D-pad Left
+        15: "right"   // D-pad Right
     };
 
     const direction = directionMap[index];
+    const arrowKeyMap = {
+        "top": "ArrowUp",
+        "bottom": "ArrowDown",
+        "left": "ArrowLeft",
+        "right": "ArrowRight"
+    };
 
-    if (direction) {
-        if (isPressed) {
-            // Action initiated only once when the button is pressed
-            console.log("Performing action for direction:", direction);
-            isolateStem(direction); // This assumes isolateStem is a temporary action
+    if (direction && isPressed) {
+        // If the button is pressed, check the current state
+        if (!dpadPressedState[direction]) {
+            // If not already pressed, simulate keydown and mark as pressed
+            console.log(`Simulating ${arrowKeyMap[direction]} press`);
+            document.dispatchEvent(new KeyboardEvent('keydown', { 'key': arrowKeyMap[direction] }));
+            dpadPressedState[direction] = true; // Mark as pressed
         } else {
-            // No need for a specific "cancel" action; simply note that the button was released
-            console.log("Button for direction released:", direction);
+            // If already pressed, simulate keyup and mark as not pressed
+            console.log(`Simulating ${arrowKeyMap[direction]} release`);
+            document.dispatchEvent(new KeyboardEvent('keyup', { 'key': arrowKeyMap[direction] }));
+            dpadPressedState[direction] = false; // Mark as not pressed
         }
-    } else {
+    } 
+    // Handle non-D-pad buttons without state toggling
+    else if (buttonMap[index] && isPressed) {
+        // Simulate pressing the button
+        document.dispatchEvent(new KeyboardEvent('keydown', { 'key': actionKey }));
+        // This does not include a toggle mechanism, assuming these actions are instantaneous
+    } else if (buttonMap[index] && !isPressed) {
+        // For completeness, in case you want to handle button release for non-D-pad buttons
         const actionKey = buttonMap[index];
-        if (actionKey) {
-            if (isPressed) {
-                // Simulate pressing the button
-                document.dispatchEvent(new KeyboardEvent('keydown', { 'key': actionKey }));
-            } else {
-                // Simulate releasing the button
-                document.dispatchEvent(new KeyboardEvent('keyup', { 'key': actionKey }));
-            }
-        }
+        document.dispatchEvent(new KeyboardEvent('keyup', { 'key': actionKey }));
     }
 }
 
