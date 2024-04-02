@@ -112,45 +112,28 @@ function handleButtonPress(index, isPressed) {
 
     const direction = directionMap[index];
 
-    // Use a toggle state to remember if an action is active
-    if (!window.toggleState) {
-        window.toggleState = {
-            "top": false,
-            "bottom": false,
-            "left": false,
-            "right": false
-        };
-    }
-
     if (direction) {
         if (isPressed) {
-            // Toggle the action state for the direction
-            window.toggleState[direction] = !window.toggleState[direction];
-
-            if (window.toggleState[direction]) {
-                // If toggled on, perform the action
-                console.log("Activating action for direction:", direction);
-                isolateStem(direction); // Activate the action for this direction
-            } else {
-                // If toggled off, undo the action
-                console.log("Deactivating action for direction:", direction);
-                cancelIsolation(direction); // Deactivate or undo the action
-            }
+            // Action initiated only once when the button is pressed
+            console.log("Performing action for direction:", direction);
+            isolateStem(direction); // This assumes isolateStem is a temporary action
+        } else {
+            // No need for a specific "cancel" action; simply note that the button was released
+            console.log("Button for direction released:", direction);
         }
-        // No need to handle button release separately for toggle functionality
     } else {
-        // For other buttons, handle press and release actions
         const actionKey = buttonMap[index];
         if (actionKey) {
             if (isPressed) {
+                // Simulate pressing the button
                 document.dispatchEvent(new KeyboardEvent('keydown', { 'key': actionKey }));
             } else {
+                // Simulate releasing the button
                 document.dispatchEvent(new KeyboardEvent('keyup', { 'key': actionKey }));
             }
         }
     }
 }
-
 
 
 // Improved polling function to check for gamepad inputs
