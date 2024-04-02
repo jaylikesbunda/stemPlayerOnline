@@ -102,18 +102,26 @@ function updateButtonState(gamepad) {
     });
 }
 
-// Adjust handleButtonPress to differentiate between press and release
+// Adjust handleButtonPress to handle D-pad press correctly
 function handleButtonPress(index, isPressed) {
-    if (dpadMap[index]) {
-        const direction = dpadMap[index];
-        
+    // This maps the gamepad D-pad directions to the expected strings
+    const directionMap = {
+        12: "top",    // D-pad Up
+        13: "bottom", // D-pad Down
+        14: "left",   // D-pad Left
+        15: "right"   // D-pad Right
+    };
+
+    const direction = directionMap[index]; // Get the direction string based on D-pad input
+
+    if (direction) { // If the index corresponds to a D-pad direction
         if (isPressed) {
-            // Simulate holding down the D-pad for stem isolation
+            // Initiates a delayed check to determine if the button is held
             dpadHold[direction] = true;
             setTimeout(() => {
                 if (dpadHold[direction]) { // If still holding the button
                     console.log("Isolating stem due to D-pad hold:", direction);
-                    isolateStem(dir); // Call your isolation function
+                    isolateStem(direction); // Now calling isolateStem with the correct direction string
                 }
             }, 500); // Adjust delay as needed for how long to hold before isolation
         } else {
@@ -121,13 +129,15 @@ function handleButtonPress(index, isPressed) {
             dpadHold[direction] = false;
         }
     } else if (buttonMap[index] && isPressed) {
-        // For other buttons, just handle press actions (not concerned with release here)
+        // Handle other button presses without modifiers. Dispatch keydown event to simulate the key press.
         const actionKey = buttonMap[index];
         document.dispatchEvent(new KeyboardEvent('keydown', { 'key': actionKey }));
-        // Optionally, dispatch 'keyup' if needed for the action to be recognized properly
-    }
 
+        // Optionally, add a setTimeout to dispatch 'keyup' if necessary for the action recognition.
+        // This would simulate a full key press and release cycle.
+    }
 }
+
 
 // Improved polling function to check for gamepad inputs
 function pollGamepads() {
