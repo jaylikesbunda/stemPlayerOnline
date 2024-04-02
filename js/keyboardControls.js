@@ -1,5 +1,6 @@
 let controlPressed = false;
 let shiftPressed = false;
+const buttonPressedState = {};
 
 const handleLoopModeKey = (key) => {
         let curSpeedIndex = Number(audio.playbackRate / 0.5);
@@ -81,40 +82,51 @@ document.addEventListener("keyup", (e) => {
 });
 
 
-// Polling function to check for gamepad inputs
-function pollGamepad() {
-    const gamepad = navigator.getGamepads()[0]; // Assuming the first gamepad is the one we're interested in
-    if (!gamepad) return;
-
-    // Check each button
-    gamepad.buttons.forEach((button, index) => {
-        if (button.pressed) {
-            if (buttonMap[index]) {
-                const actionKey = buttonMap[index];
-                document.dispatchEvent(new KeyboardEvent('keydown', {'key': actionKey}));
-            }
-            if (index === 4) shiftPressed = true; // L1
-            if (index === 5) controlPressed = true; // R1
-        } else {
-            if (index === 4) shiftPressed = false; // L1
-            if (index === 5) controlPressed = false; // R1
-        }
-    });
-
-    // Check D-pad
-    Object.keys(dpadMap).forEach(dpadIndex => {
-        if (gamepad.buttons[dpadIndex].pressed) {
-            const actionKey = dpadMap[dpadIndex];
-            document.dispatchEvent(new KeyboardEvent('keydown', {'key': actionKey}));
-        }
-    });
-
-    // Analog sticks can be mapped here similarly if needed
-
-    requestAnimationFrame(pollGamepad); // Continue polling
+function updateButtonState(gamepad) {
+  gamepad.buttons.forEach((button, index) => {
+    const currentState = button.pressed;
+    if (buttonPressedState[index] !== currentState) {
+      buttonPressedState[index] = currentState;
+      if (currentState) {
+        handleButtonPress(index);
+      }
+    }
+  });
 }
 
-// Start polling for gamepad input
-window.addEventListener('load', () => {
-    pollGamepad();
+// Function to handle button presses
+function handleButtonPress(index) {
+  // Mapping buttons to keyboard actions
+  if (buttonMap[index]) {
+    const actionKey = buttonMap[index];
+    document.dispatchEvent(new KeyboardEvent('keydown', { 'key': actionKey }));
+  }
+  // Handling modifier keys
+  if (index === 4) shiftPressed = true;
+  if (index === 5) controlPressed = true;
+  // Resetting modifier keys on button release could be added in a similar way
+}
+
+// Improved polling function to check for gamepad inputs
+function pollGamepads() {
+  const gamepads = navigator.getGamepads();
+  for (const gamepad of gamepads) {
+    if (gamepad) {
+      updateButtonState(gamepad);
+      // Additional logic for D-pad and analog sticks can be added here
+    }
+  }
+  requestAnimationFrame(pollGamepads);
+}
+
+// Handling gamepad connection
+window.addEventListener('gamepadconnected', (e) => {
+  console.log(`Gamepad connected at index ${e.gamepad.index}: ${e.gamepad.id}.`);
+  pollGamepads(); // Start polling when a gamepad is connected
+});
+
+// Optional: Handling gamepad disconnection
+window.addEventListener('gamepaddisconnected', (e) => {
+  console.log(`Gamepad disconnected from index ${e.gamepad.index}: ${e.gamepad.id}.`);
+  // Here you might want to update your application state or UI to reflect the disconnection
 });
