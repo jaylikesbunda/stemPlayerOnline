@@ -52,6 +52,12 @@ const dpadMap = {
     15: 'ArrowRight',
 };
 
+let dpadHold = {
+    'ArrowUp': false,
+    'ArrowDown': false,
+    'ArrowLeft': false,
+    'ArrowRight': false,
+};
 
 document.addEventListener("keydown", (e) => {
         const key = e.key;
@@ -83,28 +89,44 @@ document.addEventListener("keyup", (e) => {
 
 
 function updateButtonState(gamepad) {
-  gamepad.buttons.forEach((button, index) => {
-    const currentState = button.pressed;
-    if (buttonPressedState[index] !== currentState) {
-      buttonPressedState[index] = currentState;
-      if (currentState) {
-        handleButtonPress(index);
-      }
-    }
-  });
+    gamepad.buttons.forEach((button, index) => {
+        const currentState = button.pressed;
+        if (buttonPressedState[index] !== currentState) {
+            buttonPressedState[index] = currentState;
+            if (currentState) {
+                handleButtonPress(index, true); // Button pressed
+            } else {
+                handleButtonPress(index, false); // Button released
+            }
+        }
+    });
 }
 
-// Function to handle button presses
-function handleButtonPress(index) {
-  // Mapping buttons to keyboard actions
-  if (buttonMap[index]) {
-    const actionKey = buttonMap[index];
-    document.dispatchEvent(new KeyboardEvent('keydown', { 'key': actionKey }));
-  }
-  // Handling modifier keys
-  if (index === 4) shiftPressed = true;
-  if (index === 5) controlPressed = true;
-  // Resetting modifier keys on button release could be added in a similar way
+// Adjust handleButtonPress to differentiate between press and release
+function handleButtonPress(index, isPressed) {
+    if (dpadMap[index]) {
+        const direction = dpadMap[index];
+        
+        if (isPressed) {
+            // Simulate holding down the D-pad for stem isolation
+            dpadHold[direction] = true;
+            setTimeout(() => {
+                if (dpadHold[direction]) { // If still holding the button
+                    console.log("Isolating stem due to D-pad hold:", direction);
+                    isolateStem(direction); // Call your isolation function
+                }
+            }, 500); // Adjust delay as needed for how long to hold before isolation
+        } else {
+            // Reset hold state on release
+            dpadHold[direction] = false;
+        }
+    } else if (buttonMap[index] && isPressed) {
+        // For other buttons, just handle press actions (not concerned with release here)
+        const actionKey = buttonMap[index];
+        document.dispatchEvent(new KeyboardEvent('keydown', { 'key': actionKey }));
+        // Optionally, dispatch 'keyup' if needed for the action to be recognized properly
+    }
+
 }
 
 // Improved polling function to check for gamepad inputs
