@@ -113,7 +113,7 @@ function handleButtonPress(index, isPressed) {
             setTimeout(() => {
                 if (dpadHold[direction]) { // If still holding the button
                     console.log("Isolating stem due to D-pad hold:", direction);
-                    isolateStem(direction); // Call your isolation function
+                    isolateStem(dir); // Call your isolation function
                 }
             }, 500); // Adjust delay as needed for how long to hold before isolation
         } else {
