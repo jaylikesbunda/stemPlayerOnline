@@ -102,39 +102,42 @@ function updateButtonState(gamepad) {
     });
 }
 
-// Adjust handleButtonPress to handle D-pad press correctly
 function handleButtonPress(index, isPressed) {
-    // This maps the gamepad D-pad directions to the expected strings
     const directionMap = {
-        12: "top",    // D-pad Up
-        13: "bottom", // D-pad Down
-        14: "left",   // D-pad Left
-        15: "right"   // D-pad Right
+        12: "top",
+        13: "bottom",
+        14: "left",
+        15: "right"
     };
 
-    const direction = directionMap[index]; // Get the direction string based on D-pad input
+    const direction = directionMap[index];
 
-    if (direction) { // If the index corresponds to a D-pad direction
+    if (direction) {
         if (isPressed) {
-            // Initiates a delayed check to determine if the button is held
             dpadHold[direction] = true;
             setTimeout(() => {
-                if (dpadHold[direction]) { // If still holding the button
+                if (dpadHold[direction]) {
                     console.log("Isolating stem due to D-pad hold:", direction);
-                    isolateStem(direction); // Now calling isolateStem with the correct direction string
+                    isolateStem(direction);
                 }
-            }, 500); // Adjust delay as needed for how long to hold before isolation
+            }, 500); 
         } else {
-            // Reset hold state on release
             dpadHold[direction] = false;
+            // Add logic here if you need to cancel or reverse the isolation when the button is released
+            console.log("Released D-pad direction:", direction);
+            // Example: cancelIsolation(direction); if you have such functionality
         }
-    } else if (buttonMap[index] && isPressed) {
-        // Handle other button presses without modifiers. Dispatch keydown event to simulate the key press.
+    } else {
         const actionKey = buttonMap[index];
-        document.dispatchEvent(new KeyboardEvent('keydown', { 'key': actionKey }));
-
-        // Optionally, add a setTimeout to dispatch 'keyup' if necessary for the action recognition.
-        // This would simulate a full key press and release cycle.
+        if (actionKey) {
+            if (isPressed) {
+                // Simulate pressing the button
+                document.dispatchEvent(new KeyboardEvent('keydown', { 'key': actionKey }));
+            } else {
+                // Simulate releasing the button
+                document.dispatchEvent(new KeyboardEvent('keyup', { 'key': actionKey }));
+            }
+        }
     }
 }
 
