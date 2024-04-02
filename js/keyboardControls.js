@@ -125,31 +125,33 @@ function handleButtonPress(index, isPressed) {
         "right": "ArrowRight"
     };
 
+    // Correcting the handling for D-pad buttons
     if (direction && isPressed) {
-        // If the button is pressed, check the current state
         if (!dpadPressedState[direction]) {
-            // If not already pressed, simulate keydown and mark as pressed
             console.log(`Simulating ${arrowKeyMap[direction]} press`);
             document.dispatchEvent(new KeyboardEvent('keydown', { 'key': arrowKeyMap[direction] }));
-            dpadPressedState[direction] = true; // Mark as pressed
+            dpadPressedState[direction] = true;
         } else {
-            // If already pressed, simulate keyup and mark as not pressed
             console.log(`Simulating ${arrowKeyMap[direction]} release`);
             document.dispatchEvent(new KeyboardEvent('keyup', { 'key': arrowKeyMap[direction] }));
-            dpadPressedState[direction] = false; // Mark as not pressed
+            dpadPressedState[direction] = false;
         }
     } 
-    // Handle non-D-pad buttons without state toggling
-    else if (buttonMap[index] && isPressed) {
-        // Simulate pressing the button
-        document.dispatchEvent(new KeyboardEvent('keydown', { 'key': actionKey }));
-        // This does not include a toggle mechanism, assuming these actions are instantaneous
-    } else if (buttonMap[index] && !isPressed) {
-        // For completeness, in case you want to handle button release for non-D-pad buttons
-        const actionKey = buttonMap[index];
-        document.dispatchEvent(new KeyboardEvent('keyup', { 'key': actionKey }));
+    // Adjusting handling for non-D-pad buttons to define actionKey correctly
+    else {
+        const actionKey = buttonMap[index]; // Ensure actionKey is defined based on buttonMap
+        if (actionKey) {
+            if (isPressed) {
+                // Now actionKey is defined, so we can simulate pressing the button
+                document.dispatchEvent(new KeyboardEvent('keydown', { 'key': actionKey }));
+            } else {
+                // Simulating releasing the button
+                document.dispatchEvent(new KeyboardEvent('keyup', { 'key': actionKey }));
+            }
+        }
     }
 }
+
 
 
 // Improved polling function to check for gamepad inputs
